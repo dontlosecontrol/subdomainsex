@@ -8,8 +8,6 @@ defmodule SubdomainsFinder.Engines.Netcraft do
   def name, do: "netcraft"
 
   @impl true
-  def enumerate(domain, opts \\ [])
-
   def enumerate(domain, opts) do
     client = setup_http_client()
     do_enumerate(domain, client, MapSet.new(), opts)

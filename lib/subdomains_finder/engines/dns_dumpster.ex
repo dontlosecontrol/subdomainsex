@@ -8,8 +8,6 @@ defmodule SubdomainsFinder.Engines.DNSDumpster do
   def name, do: "dnsdumpster"
 
   @impl true
-  def enumerate(domain, opts \\ [])
-
   def enumerate(domain, opts) do
     client = setup_http_client()
     do_enumerate(domain, client, opts)
