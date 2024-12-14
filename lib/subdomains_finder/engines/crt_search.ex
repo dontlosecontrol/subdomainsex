@@ -1,24 +1,37 @@
 defmodule SubdomainsFinder.Engines.CrtSearch do
-  use SubdomainsFinder.Engine
+  @behaviour SubdomainsFinder.Engine
+  use GenServer
   require Logger
 
   @base_url "https://crt.sh/?q=%25.{domain}"
 
-  @impl true
-  def name, do: "ssl"
-
-  @impl true
-  def enumerate(domain, opts) do
-    client = setup_http_client()
-    do_enumerate(domain, client, opts)
+  # API
+  def start_link(opts \\ []) do
+    SubdomainsFinder.Engine.start_engine(__MODULE__, opts)
   end
 
-  @impl true
-  def handle_call({:enumerate, domain, opts}, _from, state) do
-    case enumerate(domain, opts) do
-      {:ok, subdomains} -> {:reply, {:ok, subdomains}, state}
-      {:error, reason} -> {:reply, {:error, reason}, state}
-    end
+  def enumerate(domain, opts \\ []) do
+    SubdomainsFinder.Engine.enumerate(__MODULE__, domain, opts)
+  end
+
+  # Callbacks
+  @impl GenServer
+  def init(opts) do
+    SubdomainsFinder.Engine.init_engine(__MODULE__, opts)
+  end
+
+  @impl GenServer
+  def handle_call({:enumerate, domain, opts}, from, state) do
+    SubdomainsFinder.Engine.handle_enumerate_call(__MODULE__, {domain, opts}, from, state)
+  end
+
+  @impl SubdomainsFinder.Engine
+  def name, do: "ssl"
+
+  @impl SubdomainsFinder.Engine
+  def do_enumerate(domain, opts) do
+    client = setup_http_client()
+    process_crt_search(domain, client, opts)
   end
 
   defp setup_http_client do
