@@ -7,7 +7,9 @@ defmodule SubdomainsFinder.CLI do
         verbose: :boolean,
         engines: :string,
         ports: :string,
-        no_color: :boolean
+        no_color: :boolean,
+        format: :string,
+        headers: :boolean
       ],
       aliases: [
         d: :domain,
@@ -15,7 +17,9 @@ defmodule SubdomainsFinder.CLI do
         v: :verbose,
         e: :engines,
         p: :ports,
-        n: :no_color
+        n: :no_color,
+        f: :format,
+        h: :headers
       ]
     )
 
@@ -55,11 +59,20 @@ defmodule SubdomainsFinder.CLI do
   end
 
   defp handle_results(results, opts) do
-    if opts[:output] do
-      File.write!(opts[:output], Enum.join(results, "\n"))
-      IO.puts("Results saved to #{opts[:output]}")
-    else
-      Enum.each(results, &IO.puts/1)
+    format = opts[:format] || "text"
+    format_opts = [include_headers: opts[:headers]]
+
+    case SubdomainsFinder.Formatter.format(results, format, format_opts) do
+      {:ok, formatted} ->
+        if opts[:output] do
+          File.write!(opts[:output], formatted)
+          IO.puts("Results saved to #{opts[:output]}")
+        else
+          IO.puts(formatted)
+        end
+      {:error, reason} ->
+        IO.puts(:stderr, "Error formatting results: #{reason}")
+        System.halt(1)
     end
   end
 end

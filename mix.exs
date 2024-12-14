@@ -25,7 +25,8 @@ defmodule SubdomainsFinder.MixProject do
       {:jason, "~> 1.2"},
       {:dns, "~> 2.2"},
       {:floki, "~> 0.32.0"},
-      {:telemetry, "~> 1.0"}
+      {:telemetry, "~> 1.0"},
+      {:csv, "~> 3.0"}
     ]
   end
 end
