@@ -46,6 +46,9 @@ defmodule SubdomainsFinder.Engines.Google do
     else
       query = generate_query(domain, MapSet.to_list(found_subdomains))
 
+      # Apply rate limiting before making request
+      :ok = SubdomainsFinder.RateLimit.Worker.request("google", burst: 1)
+
       case make_request(client, query, page_no) do
         {:ok, body} ->
           new_subdomains = extract_subdomains(body, domain)
@@ -73,16 +76,17 @@ defmodule SubdomainsFinder.Engines.Google do
   defp setup_http_client do
     Req.new(
       base_url: @base_url,
-      #user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-      user_agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.102 Safari/537.36",
+      user_agent: random_user_agent(),
       headers: [
         accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
         "accept-language": "en-US,en;q=0.8",
         "accept-encoding": "gzip"
       ],
       retry: :transient,
-      max_retries: 3,
-      retry_delay: fn attempt -> attempt * 1000 end
+      max_retries: 5,
+      retry_delay: &exponential_backoff/1,
+      follow_redirects: true,
+      max_redirects: 3
     )
   end
 
@@ -162,5 +166,26 @@ defmodule SubdomainsFinder.Engines.Google do
 
   defp check_max_pages(page_no) do
     page_no >= @max_pages
+  end
+
+  defp random_user_agent do
+    [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.102 Safari/537.36",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15"
+    ]
+    |> Enum.random()
+  end
+
+  defp exponential_backoff(attempt) do
+    base_delay = 1000
+    max_delay = 30_000
+    random_factor = :rand.uniform(1000)
+    
+    delay = base_delay * :math.pow(2, attempt - 1) + random_factor
+    min(delay, max_delay)
+    |> round()
   end
 end
