@@ -42,7 +42,7 @@ defmodule SubdomainsFinder.Engines.DNSDumpster do
          {:ok, token} <- extract_csrf_token(initial_resp),
          {:ok, cookies} <- extract_cookies(initial_resp),
          {:ok, resp} <- make_search_request(client, domain, token, cookies) do
-      
+
       subdomains = extract_subdomains(resp, domain)
       {:ok, validate_subdomains(subdomains, domain)}
     else
@@ -117,7 +117,7 @@ defmodule SubdomainsFinder.Engines.DNSDumpster do
     end
   end
 
-  defp extract_subdomains(%{body: body}, domain) do
+  defp extract_subdomains(%{body: body}, _domain) do
     case Floki.parse_document(body) do
       {:ok, document} ->
         document
