@@ -1,24 +1,39 @@
 defmodule SubdomainsFinder.Engines.ThreatCrowd do
-  use SubdomainsFinder.Engine
+  @behaviour SubdomainsFinder.Engine
+  use GenServer
   require Logger
+
+  def start_link(opts \\ []) do
+    SubdomainsFinder.Engine.start_engine(__MODULE__, opts)
+  end
 
   @base_url "https://www.threatcrowd.org/searchApi/v2/domain/report/?domain={domain}"
 
-  @impl true
+  @impl SubdomainsFinder.Engine
   def name, do: "threatcrowd"
 
-  @impl true
-  def enumerate(domain, opts) do
-    client = setup_http_client()
-    do_enumerate(domain, client, opts)
+  def enumerate(domain, opts \\ []) do
+    GenServer.call(__MODULE__, {:enumerate, domain, opts})
   end
 
-  @impl true
+  @impl GenServer
+  def init(opts) do
+    SubdomainsFinder.Engine.init_engine(__MODULE__, opts)
+  end
+
+  @impl GenServer
   def handle_call({:enumerate, domain, opts}, _from, state) do
-    case enumerate(domain, opts) do
+    client = setup_http_client()
+    case do_enumerate(domain, client, opts) do
       {:ok, subdomains} -> {:reply, {:ok, subdomains}, state}
       {:error, reason} -> {:reply, {:error, reason}, state}
     end
+  end
+
+  @impl SubdomainsFinder.Engine
+  def do_enumerate(domain, opts) do
+    client = setup_http_client()
+    do_enumerate(domain, client, opts)
   end
 
   defp setup_http_client do
