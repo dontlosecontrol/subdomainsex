@@ -8,7 +8,7 @@ defmodule SubdomainsFinder.Engines.ThreatCrowd do
   def name, do: "threatcrowd"
 
   @impl true
-  def enumerate(domain, opts \\ []) do
+  def enumerate(domain, opts) do
     client = setup_http_client()
     do_enumerate(domain, client, opts)
   end
