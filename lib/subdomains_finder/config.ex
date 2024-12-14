@@ -35,9 +35,9 @@ defmodule SubdomainsFinder.Config do
     {:reply, value, state}
   end
 
-  def handle_call({:set, key, value}, _from, state) do
+  def handle_call({:set, key, value}, _from, _state) do
     Application.put_env(@app, key, value)
-    {:reply, :ok, new_state}
+    {:reply, :ok, %{}}
   end
 
   def handle_call({:get_rate_limit, engine}, _from, state) do
@@ -48,10 +48,10 @@ defmodule SubdomainsFinder.Config do
     {:reply, limit, state}
   end
 
-  def handle_call({:set_rate_limit, engine, limit}, _from, state) do
+  def handle_call({:set_rate_limit, engine, limit}, _from, _state) do
     limits = Application.get_env(@app, :rate_limits, %{})
     new_limits = Map.put(limits, engine, limit)
     Application.put_env(@app, :rate_limits, new_limits)
-    {:reply, :ok, new_state}
+    {:reply, :ok, %{}}
   end
 end
