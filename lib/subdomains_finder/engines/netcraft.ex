@@ -31,7 +31,7 @@ defmodule SubdomainsFinder.Engines.Netcraft do
   @impl SubdomainsFinder.Engine
   def do_enumerate(domain, opts) do
     client = setup_http_client()
-    process_pages(domain, client, MapSet.new(), opts)
+    do_enumerate(domain, client, MapSet.new(), opts)
   end
 
   defp setup_http_client do
