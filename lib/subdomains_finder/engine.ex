@@ -8,7 +8,17 @@ defmodule SubdomainsFinder.Engine do
       use GenServer
       require Logger
 
-      def start_link(opts) do
+      def child_spec(opts) do
+        %{
+          id: __MODULE__,
+          start: {__MODULE__, :start_link, [opts]},
+          type: :worker,
+          restart: :permanent,
+          shutdown: 5000
+        }
+      end
+
+      def start_link(opts \\ []) do
         GenServer.start_link(__MODULE__, opts, name: __MODULE__)
       end
 
