@@ -14,11 +14,19 @@ defmodule SubdomainsFinder.Engine do
 
       @impl true
       def init(opts) do
-        {:ok, %{opts: opts}}
+        rate_limit = SubdomainsFinder.Config.get_rate_limit(name())
+        SubdomainsFinder.RateLimit.Worker.set_rate(name(), rate_limit)
+        
+        {:ok, %{
+          opts: opts,
+          rate_limit: rate_limit,
+          user_agent: SubdomainsFinder.Config.get(:user_agent)
+        }}
       end
 
       def enumerate(domain, opts \\ []) do
-        GenServer.call(__MODULE__, {:enumerate, domain, opts})
+        GenServer.call(__MODULE__, {:enumerate, domain, opts}, 
+          SubdomainsFinder.Config.get([:timeouts, :engine]))
       end
 
       defoverridable [init: 1]
