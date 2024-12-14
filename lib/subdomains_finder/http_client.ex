@@ -22,7 +22,7 @@ defmodule SubdomainsFinder.HTTPClient do
           [:subdomains_finder, :http, :request],
           %{method: method, url: url},
           fn ->
-            case Req.request(method, url, opts) do
+            case :req.request(method, url, opts) do
               {:ok, response} = success -> 
                 {success, %{status: response.status}}
               error -> 

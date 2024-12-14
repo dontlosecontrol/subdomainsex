@@ -46,7 +46,8 @@ defmodule SubdomainsFinder.Engines.DNSDumpster do
       ],
       retry: :transient,
       max_retries: 3,
-      retry_delay: fn attempt -> attempt * 1000 end
+      retry_delay: fn attempt -> attempt * 1000 end,
+      redirect: true
     )
   end
 

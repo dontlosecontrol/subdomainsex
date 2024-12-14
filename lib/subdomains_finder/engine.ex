@@ -30,7 +30,7 @@ defmodule SubdomainsFinder.Engine do
 
   def enumerate(module, domain, opts \\ []) do
     GenServer.call(module, {:enumerate, domain, opts},
-      SubdomainsFinder.Config.get([:timeouts, :engine]))
+      SubdomainsFinder.Config.get(:engine_timeout, 60_000))
   end
 
   def handle_enumerate_call(module, {domain, opts}, _from, state) do

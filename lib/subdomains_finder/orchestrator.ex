@@ -69,7 +69,8 @@ defmodule SubdomainsFinder.Orchestrator do
   end
 
   defp process_results(domain, tasks) do
-    results = Task.await_many(tasks, 30_000)
+    timeout = SubdomainsFinder.Config.get(:engine_timeout, 60_000)
+    results = Task.await_many(tasks, timeout)
     |> Enum.reduce(%{subdomains: MapSet.new(), errors: []}, fn {engine, result}, acc ->
       case result do
         {:ok, subdomains} ->

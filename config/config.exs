@@ -8,10 +8,8 @@ config :subdomains_finder,
     "threatcrowd" => 2_000, # 1 request per 2 seconds
     "ssl" => 1_000         # 1 request per second
   },
-  timeouts: %{
-    request: 30_000,        # 30 seconds
-    engine: 60_000         # 1 minute
-  },
+  request_timeout: 30_000,  # 30 seconds
+  engine_timeout: 60_000,   # 1 minute
   retries: %{
     max_attempts: 3,
     backoff: 1_000         # 1 second
