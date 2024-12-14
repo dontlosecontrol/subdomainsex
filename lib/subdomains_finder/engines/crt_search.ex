@@ -31,7 +31,7 @@ defmodule SubdomainsFinder.Engines.CrtSearch do
   @impl SubdomainsFinder.Engine
   def do_enumerate(domain, opts) do
     client = setup_http_client()
-    process_crt_search(domain, client, opts)
+    do_enumerate(domain, client, opts)
   end
 
   defp setup_http_client do

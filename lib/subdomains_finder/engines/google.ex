@@ -59,7 +59,7 @@ defmodule SubdomainsFinder.Engines.Google do
           end
 
         {:error, :rate_limited} ->
-          Logger.warn("Rate limited by Google. Waiting 30 seconds before retry...")
+          Logger.warning("Rate limited by Google. Waiting 30 seconds before retry...")
           :timer.sleep(30_000)
           do_enumerate_pages(domain, client, found_subdomains, opts, page_no)
 
