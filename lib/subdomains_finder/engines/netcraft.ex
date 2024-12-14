@@ -36,7 +36,7 @@ defmodule SubdomainsFinder.Engines.Netcraft do
     )
   end
 
-  defp do_enumerate(domain, client, found_subdomains, opts) do
+  defp do_enumerate(domain, client, found_subdomains, _opts) do
     # First request to get cookies
     case make_initial_request(client) do
       {:ok, cookies} ->
@@ -109,7 +109,7 @@ defmodule SubdomainsFinder.Engines.Netcraft do
   defp create_cookies(cookie_string) do
     [cookie | _] = String.split(cookie_string, ";")
     [key, value] = String.split(cookie, "=")
-    
+
     %{
       key => value,
       "netcraft_js_verification_response" => generate_verification_response(value)
@@ -125,9 +125,9 @@ defmodule SubdomainsFinder.Engines.Netcraft do
 
   defp extract_subdomains(body) do
     {:ok, document} = Floki.parse_document(body)
-    
+
     Floki.find(document, "a.results-table__host")
-    |> Enum.map(fn {"a", _, [content]} -> 
+    |> Enum.map(fn {"a", _, [content]} ->
       content
       |> String.trim()
       |> extract_domain()
@@ -150,7 +150,7 @@ defmodule SubdomainsFinder.Engines.Netcraft do
 
   defp get_next_page(body) do
     {:ok, document} = Floki.parse_document(body)
-    
+
     case Floki.find(document, "a:fl-contains('Next Page')") do
       [{"a", [{"href", next_url} | _], _} | _] ->
         "https://searchdns.netcraft.com" <> next_url
