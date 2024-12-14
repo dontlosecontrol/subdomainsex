@@ -13,8 +13,7 @@ defmodule SubdomainsFinder.Engines.Google do
   end
 
   def enumerate(domain, opts \\ []) do
-    client = setup_http_client()
-    do_enumerate_pages(domain, client, MapSet.new(), opts)
+    GenServer.call(__MODULE__, {:enumerate, domain, opts})
   end
 
   # Callbacks
@@ -24,8 +23,12 @@ defmodule SubdomainsFinder.Engines.Google do
   end
 
   @impl GenServer
-  def handle_call({:enumerate, domain, opts}, from, state) do
-    SubdomainsFinder.Engine.handle_enumerate_call(__MODULE__, {domain, opts}, from, state)
+  def handle_call({:enumerate, domain, opts}, _from, state) do
+    client = setup_http_client()
+    case do_enumerate_pages(domain, client, MapSet.new(), opts) do
+      {:ok, subdomains} -> {:reply, {:ok, subdomains}, state}
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
   end
 
   @impl SubdomainsFinder.Engine
