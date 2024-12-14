@@ -18,14 +18,7 @@ defmodule SubdomainsFinder.Orchestrator do
   end
 
   defp validate_domain(domain) do
-    domain = String.trim(domain)
-    regex = ~r/^(http|https)?[a-zA-Z0-9]+([\-\.]{1}[a-zA-Z0-9]+)*\.[a-zA-Z]{2,}$/
-
-    if String.match?(domain, regex) do
-      {:ok, domain}
-    else
-      {:error, "Invalid domain format"}
-    end
+    SubdomainsFinder.Domain.validate(domain)
   end
 
   defp get_engines(opts) do
