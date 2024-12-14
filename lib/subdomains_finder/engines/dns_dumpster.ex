@@ -44,9 +44,9 @@ defmodule SubdomainsFinder.Engines.DNSDumpster do
         "accept-encoding": "gzip",
         referer: "https://dnsdumpster.com"
       ],
-      retry: true,
+      retry: :transient,
       max_retries: 3,
-      retry_delay: fn attempt -> :timer.sleep(1000 * attempt) end
+      retry_delay: fn attempt -> attempt * 1000 end
     )
   end
 
