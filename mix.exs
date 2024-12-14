@@ -8,7 +8,9 @@ defmodule SubdomainsFinder.MixProject do
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      escript: [main_module: SubdomainsFinder.CLI]
+      escript: [main_module: SubdomainsFinder.CLI],
+      config_path: "config/config.exs",
+      config_warning: false
     ]
   end
 
