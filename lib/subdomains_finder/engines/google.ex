@@ -45,24 +45,24 @@ defmodule SubdomainsFinder.Engines.Google do
       {:ok, MapSet.to_list(found_subdomains)}
     else
       query = generate_query(domain, MapSet.to_list(found_subdomains))
-      
+
       case make_request(client, query, page_no) do
         {:ok, body} ->
           new_subdomains = extract_subdomains(body, domain)
           updated_subdomains = MapSet.union(found_subdomains, MapSet.new(new_subdomains))
-          
+
           if MapSet.size(updated_subdomains) == MapSet.size(found_subdomains) do
             {:ok, MapSet.to_list(updated_subdomains)}
           else
             :timer.sleep(5000) # Avoid rate limiting
             do_enumerate_pages(domain, client, updated_subdomains, opts, page_no + 10)
           end
-          
+
         {:error, :rate_limited} ->
           Logger.warn("Rate limited by Google. Waiting 30 seconds before retry...")
           :timer.sleep(30_000)
           do_enumerate_pages(domain, client, found_subdomains, opts, page_no)
-          
+
         {:error, reason} ->
           Logger.error("Google enumeration failed: #{inspect(reason)}")
           {:error, reason}
@@ -97,18 +97,18 @@ defmodule SubdomainsFinder.Engines.Google do
       start: to_string(page_no),
       filter: "0"
     ]
-    
+
     case Req.get(client, params: params) do
       {:ok, %{status: 200, body: body}} ->
         {:ok, body}
-      
+
       {:ok, %{status: 429}} ->
         {:error, :rate_limited}
-      
+
       {:ok, response} ->
         Logger.error("Unexpected response: #{inspect(response)}")
         {:error, :unexpected_response}
-      
+
       {:error, reason} ->
         {:error, reason}
     end
@@ -129,9 +129,9 @@ defmodule SubdomainsFinder.Engines.Google do
 
   defp extract_subdomains(body, domain) do
     {:ok, document} = Floki.parse_document(body)
-    
+
     Floki.find(document, "cite")
-    |> Enum.map(fn {"cite", _, [content]} -> 
+    |> Enum.map(fn {"cite", _, [content]} ->
       content
       |> String.replace(~r/<.*?>/, "")
       |> extract_domain()
