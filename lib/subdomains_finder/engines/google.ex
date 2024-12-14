@@ -79,9 +79,9 @@ defmodule SubdomainsFinder.Engines.Google do
         "accept-language": "en-US,en;q=0.8",
         "accept-encoding": "gzip"
       ],
-      retry: true,
+      retry: fn -> :transient end,
       max_retries: 3,
-      retry_delay: fn attempt -> :timer.sleep(1000 * attempt) end
+      retry_delay: fn attempt -> attempt * 1000 end
     )
   end
 
